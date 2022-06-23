@@ -40,6 +40,19 @@ CC = BitAnd32(CC, BitNot32(BitShiftLeft32(0x0F, 16)))
 CC = BitOr32(CC, BitShiftLeft32(4, 16))
 WriteCtrlReg32(0x14, CC)
 
+// Set AQA.ACQS
+AQA = ReadCtrlReg32(0x24)
+AQA = BitAnd32(AQA, BitNot32(BitShiftLeft32(0xFFF, 16)))
+AQA = BitOr32(AQA, BitShiftLeft32(acqSize-1, 16))
+WriteCtrlReg32(0x24, AQA)
+
+// Set AQA.ASQS
+AQA = ReadCtrlReg32(0x24)
+AQA = BitAnd32(AQA, BitNot32(BitShiftLeft32(0xFFF, 0)))
+AQA = BitOr32(AQA, BitShiftLeft32(asqSize-1, 0))
+WriteCtrlReg32(0x24, AQA)
+
+
 
 WriteCtrlReg32(0x14, Bit
 
