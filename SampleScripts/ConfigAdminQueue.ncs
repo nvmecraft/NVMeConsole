@@ -52,7 +52,15 @@ AQA = BitAnd32(AQA, BitNot32(BitShiftLeft32(0xFFF, 0)))
 AQA = BitOr32(AQA, BitShiftLeft32(asqSize-1, 0))
 WriteCtrlReg32(0x24, AQA)
 
+// Set ASQ
+asq = new PCMEM
+asq.PCMem_Assign((2^6 * asqSize), true)
+WriteCtrlReg64(0x28, ToHexString(asq.address))
+
+// Set ACQ
+acq = new PCMEM
+aCq.PCMem_Assign((2^4 * acqSize), true)
+WriteCtrlReg64(0x30, ToHexString(acq.address))
 
 
-WriteCtrlReg32(0x14, Bit
 
