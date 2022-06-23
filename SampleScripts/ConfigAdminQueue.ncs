@@ -2,7 +2,7 @@
 //
 // 
 
-asqSzie = 256
+asqSize = 256
 acqSize = 256
 
 // Read CAP.TO
