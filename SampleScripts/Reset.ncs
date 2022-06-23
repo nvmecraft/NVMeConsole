@@ -12,17 +12,21 @@ CC = ReadCtrlReg32(0x14)
 CC = BitAnd32(CC, 0xFFFFFFFE)
 WriteCtrlReg32(0x14, CC)
 
+etime = 0
 stime = time
 while(true)
     CSTS = ReadCtrlReg32(0x1C)
     
-    if(BitAnd32(CSTS, 0x00000001) == 1 then
-        break;
+    if(BitAnd32(CSTS, 0x00000001) == 1) then
+        etime = time - stime
+        break
     end if
 
     etime = time - stime
     if(etime > TO * 0.5) then
-	      print "timeout"
-        break;
+	print "timeout"
+        break
     end if
 end while
+
+etime
