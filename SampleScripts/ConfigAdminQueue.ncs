@@ -59,7 +59,7 @@ WriteCtrlReg64(0x28, ToHexString(asq.address))
 
 // Set ACQ
 acq = new PCMEM
-aCq.PCMem_Assign((2^4 * acqSize), true)
+acq.PCMem_Assign((2^4 * acqSize), true)
 WriteCtrlReg64(0x30, ToHexString(acq.address))
 
 //Enable the controller
@@ -67,3 +67,20 @@ CC = ReadCtrlReg32(0x14)
 CC = BitOr32(CC, 0x00000001)
 WriteCtrlReg32(0x14, CC)
 
+// wait until CSTS.RDY = 1
+etime = 0
+stime = time
+while(true)
+    CSTS = ReadCtrlReg32(0x1C)
+    
+    if(BitAnd32(CSTS, 0x00000001) == 1) then
+        etime = time - stime
+        break
+    end if
+
+    etime = time - stime
+    if(etime > TO * 0.5) then
+        print "timeout"
+        break
+    end if
+end while
