@@ -11,4 +11,35 @@ CC = BitAnd32(CC, 0xFFFFFFFE)
 WriteCtrlReg32(0x14, CC)
 
 // wait until CSTS.RDY = 0
+etime = 0
+stime = time
+while(true)
+    CSTS = ReadCtrlReg32(0x1C)
+    
+    if(BitAnd32(CSTS, 0x00000001) == 0) then
+        etime = time - stime
+        break
+    end if
+
+    etime = time - stime
+    if(etime > TO * 0.5) then
+        print "timeout"
+        break
+    end if
+end while
+
+//CC.IOSQES = 6
+CC = ReadCtrlReg32(0x14)
+CC = BitAnd32(CC, BitNot32(BitShiftLeft32(0x0F, 20)))
+CC = BitOr32(CC, BitShiftLeft32(6, 20))
+WriteCtrlReg32(0x14, CC)
+
+//CC.IOCQES = 4
+CC = ReadCtrlReg32(0x14)
+CC = BitAnd32(CC, BitNot32(BitShiftLeft32(0x0F, 16)))
+CC = BitOr32(CC, BitShiftLeft32(4, 16))
+WriteCtrlReg32(0x14, CC)
+
+
+WriteCtrlReg32(0x14, Bit
 
