@@ -5,3 +5,10 @@
 asqSzie = 256
 acqSize = 256
 
+//Disable the controller
+CC = ReadCtrlReg32(0x14)
+CC = BitAnd32(CC, 0xFFFFFFFE)
+WriteCtrlReg32(0x14, CC)
+
+// wait until CSTS.RDY = 0
+
