@@ -1,1 +1,6 @@
 
+// after SelectDevice(NNN)
+
+CC = ReadCtrlReg32(0x14)
+CC = BitAnd32(CC, 0xFFFFFFFE)
+WriteCtrlReg32(0x14, CC)
