@@ -1,6 +1,28 @@
 
+// Pre-condition
 // after SelectDevice(NNN)
+// 
+
+// Read CAP.TO
+TO = ReadCtrlReg32(0x00)
+TO = BitShiftRight32(TO, 24)
+TO = BitAnd32(TO, 0xFF)
 
 CC = ReadCtrlReg32(0x14)
 CC = BitAnd32(CC, 0xFFFFFFFE)
 WriteCtrlReg32(0x14, CC)
+
+stime = time
+while(true)
+    CSTS = ReadCtrlReg32(0x1C)
+    
+    if(BitAnd32(CSTS, 0x00000001) == 1 then
+        break;
+    end if
+
+    etime = time - stime
+    if(etime > TO * 0.5) then
+	      print "timeout"
+        break;
+    end if
+end while
