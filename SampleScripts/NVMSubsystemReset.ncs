@@ -1,0 +1,21 @@
+
+
+//Read CAP.NSSRS field
+CAPh = ReadCtrlReg32(0x04)
+NSSRS = BitAnd32(BitShiftRight32(CAPh, 4), 0x00000001)
+
+if (NSSRS == 0) then
+    print "Controller doesn't supprot NVM Subsystem Reset"
+end if
+
+//Read CSTS.NSSRO
+CSTS = ReadCtrlReg32(0x1C)
+NSSRO = BitAnd32(BitShiftRight32(CSTS, 4), 0x00000001)
+
+if(NSSRO != 0) then
+    print "Perform a power cycle of the DUT and restart the test."
+end if
+
+//Write 4E564D65h (“NVMe”) to the NSSR.NSSRC field
+WriteCtrlReg32(0x20, 0x4E564D65)
+
