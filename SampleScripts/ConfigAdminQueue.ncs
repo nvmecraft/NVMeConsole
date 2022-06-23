@@ -62,5 +62,8 @@ acq = new PCMEM
 aCq.PCMem_Assign((2^4 * acqSize), true)
 WriteCtrlReg64(0x30, ToHexString(acq.address))
 
-
+//Enable the controller
+CC = ReadCtrlReg32(0x14)
+CC = BitOr32(CC, 0x00000001)
+WriteCtrlReg32(0x14, CC)
 
