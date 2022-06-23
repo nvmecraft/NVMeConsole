@@ -24,7 +24,7 @@ while(true)
 
     etime = time - stime
     if(etime > TO * 0.5) then
-	print "timeout"
+        print "timeout"
         break
     end if
 end while
