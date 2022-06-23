@@ -5,6 +5,11 @@
 asqSzie = 256
 acqSize = 256
 
+// Read CAP.TO
+TO = ReadCtrlReg32(0x00)
+TO = BitShiftRight32(TO, 24)
+TO = BitAnd32(TO, 0xFF)
+
 //Disable the controller
 CC = ReadCtrlReg32(0x14)
 CC = BitAnd32(CC, 0xFFFFFFFE)
