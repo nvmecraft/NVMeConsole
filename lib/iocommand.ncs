@@ -1,0 +1,99 @@
+//// This is the library for NVMe Device. It is imported and invoked
+// Example
+//
+//  - Write - Write 1 sector from slba = 0 with 0xFF data pattern
+//  iodata = IoCmd.SetDataMem(512, DataPattern.Ones.DPID)
+//  IoCmd.Write(1, 1, 0, 0, iodata)
+//
+//  - Read - Read 1 sector from slba = 0 and dump data
+//  iodata = IoCmd.SetDataMem(512)
+//  IoCmd.Read(1, 1, 0, 0, iodata) 
+//  iodata.DataMem_Dump
+
+
+//#LIBNAME "io"
+
+globals.IoCmd = {}
+
+//
+// Data Memory
+//
+IoCmd.SetDataMem = function(bytesize=0, datapattern=null, filepath=null)
+    if bytesize == 0 then
+        return null
+    end if
+
+    iodata = new DATAMEM
+    iodata.DataMem_Assign(bytesize)
+
+    if datapattern != null then
+        iodata.DataMem_SetDataPattern(datapattern)
+    end if
+
+    if filepath != null then
+        iodata.DataMem_FromFile(filepath)
+    end if
+    return iodata
+end function
+
+//
+// Flush
+//
+IoCmd.Flush = function(qid=1, nsid=1)
+    iosqe = new SQE
+    iosqe.opc = IoCommand.Flush.opcode
+    iosqe.nsid = nsid
+    iosqe.Sqe_SubmitTailSync(qid, 1)
+end function
+
+//
+// Write
+//
+IoCmd.Write = function(qid=1, nsid=1, slba_l, slba_u, datamem)
+    if datamem isa map then
+        iosqe = new SQE
+        iosqe.opc = IoCommand.Write.opcode
+        iosqe.nsid = nsid
+        iosqe.cdw10 = slba_l
+        iosqe.cdw11 = slba_u
+
+        nlb = datamem.size / 512
+        if nlb == 0 then
+            return false
+        end if
+
+        iosqe.datamem = datamem
+        iosqe.cdw12 = nlb-1
+        etime = iosqe.Sqe_SubmitTailSync(qid, 1)
+    else
+        return false
+    end if
+
+    return etime
+end function
+
+//
+// Read
+//
+IoCmd.Read = function(qid=1, nsid=1, slba_l, slba_u, datamem)
+    if datamem isa map then
+        iosqe = new SQE
+        iosqe.opc = IoCommand.Read.opcode
+        iosqe.nsid = nsid
+        iosqe.cdw10 = slba_l
+        iosqe.cdw11 = slba_u
+
+        nlb = datamem.size / 512
+        if nlb == 0 then
+            return false
+        end if
+
+        iosqe.datamem = datamem
+        iosqe.cdw12 = nlb-1
+        etime = iosqe.Sqe_SubmitTailSync(qid, 1)
+    else
+        return false
+    end if
+
+    return etime
+end function

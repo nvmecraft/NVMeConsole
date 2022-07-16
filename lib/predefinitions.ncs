@@ -1,0 +1,211 @@
+//
+// Pre definitions
+//
+
+//
+//  Controller Property
+//
+globals.CtrlProperty = {}
+
+CtrlProperty.CAP_l       = {"name": "CAP_l   ", "fullName": "Controller Capabilities Lower                                 ", "offset": 0x00, "size":4}           
+CtrlProperty.CAP_u       = {"name": "CAP_u   ", "fullName": "Controller Capabilities Upper                                 ", "offset": 0x04, "size":4}           
+CtrlProperty.VS          = {"name": "VS      ", "fullName": "Version                                                       ", "offset": 0x08, "size":4}   
+CtrlProperty.INTMS       = {"name": "INTMS   ", "fullName": "Interrupt Mask Set                                            ", "offset": 0x0c, "size":4}      
+CtrlProperty.INTMC       = {"name": "INTMC   ", "fullName": "Interrupt Mask Clear                                          ", "offset": 0x0f, "size":4}      
+CtrlProperty.CC          = {"name": "CC      ", "fullName": "Controller Configuration                                      ", "offset": 0x14, "size":4}   
+CtrlProperty.Reserved    = {"name": "Reserved", "fullName": "Reserved                                                      ", "offset": 0x18, "size":4}         
+CtrlProperty.CSTS        = {"name": "CSTS    ", "fullName": "Controller Status                                             ", "offset": 0x1c, "size":4}     
+CtrlProperty.NSSR        = {"name": "NSSR    ", "fullName": "NVM Subsystem Reset                                           ", "offset": 0x20, "size":4}     
+CtrlProperty.AQA         = {"name": "AQA     ", "fullName": "Admin Queue Attributes                                        ", "offset": 0x24, "size":4}    
+CtrlProperty.ASQ_l       = {"name": "ASQ_l   ", "fullName": "Admin Submission Queue Base Address Lower                     ", "offset": 0x28, "size":4}    
+CtrlProperty.ASQ_u       = {"name": "ASQ_u   ", "fullName": "Admin Submission Queue Base Address Upper                     ", "offset": 0x2C, "size":4}    
+CtrlProperty.ACQ_l       = {"name": "ACQ_l   ", "fullName": "Admin Completion Queue Base Address Lower                     ", "offset": 0x30, "size":4}    
+CtrlProperty.ACQ_u       = {"name": "ACQ_u   ", "fullName": "Admin Completion Queue Base Address Upper                     ", "offset": 0x34, "size":4}    
+CtrlProperty.CMBLOC      = {"name": "CMBLOC  ", "fullName": "Controller Memory Buffer Location                             ", "offset": 0x38, "size":4}       
+CtrlProperty.CMBSZ       = {"name": "CMBSZ   ", "fullName": "Controller Memory Buffer Size                                 ", "offset": 0x3C, "size":4}      
+CtrlProperty.BPINFO      = {"name": "BPINFO  ", "fullName": "Boot Partition Information                                    ", "offset": 0x40, "size":4}       
+CtrlProperty.BPRSEL      = {"name": "BPRSEL  ", "fullName": "Boot Partition Read Select                                    ", "offset": 0x44, "size":4}       
+CtrlProperty.BPMBL_l     = {"name": "BPMBL_l ", "fullName": "Boot Partition Memory Buffer Location Lower                   ", "offset": 0x48, "size":4}
+CtrlProperty.BPMBL_u     = {"name": "BPMBL_u ", "fullName": "Boot Partition Memory Buffer Location Upper                   ", "offset": 0x4C, "size":4}       
+CtrlProperty.CMBMSC_l    = {"name": "CMBMSC_l", "fullName": "Controller Memory Buffer Memory Space Control Lower           ", "offset": 0x50, "size":4}       
+CtrlProperty.CMBMSC_u    = {"name": "CMBMSC_u", "fullName": "Controller Memory Buffer Memory Space Control Upper           ", "offset": 0x54, "size":4}       
+CtrlProperty.CMBSTS      = {"name": "CMBSTS  ", "fullName": "Controller Memory Buffer Status                               ", "offset": 0x58, "size":4}       
+CtrlProperty.CMBEBS      = {"name": "CMBEBS  ", "fullName": "Controller Memory Buffer Elasticity Buffer Size               ", "offset": 0x5C, "size":4}       
+CtrlProperty.CMBSWTP     = {"name": "CMBSWTP ", "fullName": "Controller Memory Buffer Sustained Write Throughput           ", "offset": 0x60, "size":4}        
+CtrlProperty.NSSD        = {"name": "NSSD    ", "fullName": "NVM Subsystem Shutdown                                        ", "offset": 0x64, "size":4}     
+CtrlProperty.CRTO        = {"name": "CRTO    ", "fullName": "Controller Ready Timeouts                                     ", "offset": 0x68, "size":4}     
+CtrlProperty.Reserved    = {"name": "Reserved", "fullName": "Reserved                                                      ", "offset": 0x6C, "size":4}         
+CtrlProperty.PMRCAP      = {"name": "PMRCAP  ", "fullName": "Persistent Memory Capabilities                                ", "offset":0xE00, "size":4}       
+CtrlProperty.PMRCTL      = {"name": "PMRCTL  ", "fullName": "Persistent Memory Region Control                              ", "offset":0xE04, "size":4}       
+CtrlProperty.PMRSTS      = {"name": "PMRSTS  ", "fullName": "Persistent Memory Region Status                               ", "offset":0xE08, "size":4}       
+CtrlProperty.PMREBS      = {"name": "PMREBS  ", "fullName": "Persistent Memory Region Elasticity Buffer Size               ", "offset":0xE0C, "size":4}       
+CtrlProperty.PMRSWTP     = {"name": "PMRSWTP ", "fullName": "Persistent Memory Region Sustained Write Throughput           ", "offset":0xE10, "size":4}        
+CtrlProperty.PMRMSCL     = {"name": "PMRMSCL ", "fullName": "Persistent Memory Region Controller Memory Space Control Lower", "offset":0xE14, "size":4}        
+CtrlProperty.PMRMSCU     = {"name": "PMRMSCU ", "fullName": "Persistent Memory Region Controller Memory Space Control Upper", "offset":0xE18, "size":4}        
+
+globals.CtrlPropertyList  = [CtrlProperty.CAP_l,   CtrlProperty.CAP_u,   CtrlProperty.VS,       CtrlProperty.INTMS, 
+                             CtrlProperty.INTMC,   CtrlProperty.CC,      CtrlProperty.CSTS,     CtrlProperty.NSSR,
+                             CtrlProperty.AQA,     CtrlProperty.ASQ_l,   CtrlProperty.ASQ_u,    CtrlProperty.ACQ_l,
+                             CtrlProperty.ACQ_u,   CtrlProperty.CMBLOC,  CtrlProperty.CMBSZ,    CtrlProperty.BPINFO,
+                             CtrlProperty.BPRSEL,  CtrlProperty.BPMBL_l, CtrlProperty.BPMBL_u,  CtrlProperty.CMBMSC_l,
+                             CtrlProperty.CMBMSC_u,CtrlProperty.CMBSTS,  CtrlProperty.CMBEBS,   CtrlProperty.CMBSWTP, 
+                             CtrlProperty.NSSD,    CtrlProperty.CRTO,    CtrlProperty.PMRCAP,  CtrlProperty.PMRCTL,
+                             CtrlProperty.PMRSTS,  CtrlProperty.PMREBS,  CtrlProperty.PMRSWTP, CtrlProperty.PMRMSCL, 
+                             CtrlProperty.PMRMSCU]
+                             
+
+globals.AdminCommand = {}
+
+AdminCommand.DeleteIoSubmissionQueue  = {"name": "Delete I/O Submission Queue", "opcode": 0x00}
+AdminCommand.CreateIoSubmissionQueue  = {"name": "Create I/O Submission Queue", "opcode": 0x01}
+AdminCommand.GetLogPage               = {"name": "Get Log Page               ", "opcode": 0x02}
+AdminCommand.DeleteIoCompletionQueue  = {"name": "Delete I/O Completion Queue", "opcode": 0x04}
+AdminCommand.CreateIoCompletionQueue  = {"name": "Create I/O Completion Queue", "opcode": 0x05}
+AdminCommand.Identify                 = {"name": "Identify                   ", "opcode": 0x06}
+AdminCommand.Abort                    = {"name": "Abort                      ", "opcode": 0x08}
+AdminCommand.SetFeatures              = {"name": "Set Features               ", "opcode": 0x09}
+AdminCommand.GetFeatures              = {"name": "Get Features               ", "opcode": 0x0A}
+AdminCommand.AsynchronousEventRequest = {"name": "Asynchronous Event Request ", "opcode": 0x0C}
+AdminCommand.NamespaceManagement      = {"name": "Namespace Management       ", "opcode": 0x0D}
+AdminCommand.FirmwareCommit           = {"name": "Firmware Commit            ", "opcode": 0x10}
+AdminCommand.FirmwareImageDownload    = {"name": "Firmware Image Download    ", "opcode": 0x11}
+AdminCommand.DeviceSelftest           = {"name": "Device Self-test           ", "opcode": 0x14}
+AdminCommand.NamespaceAttachment      = {"name": "Namespace Attachment       ", "opcode": 0x15}
+AdminCommand.KeepAlive                = {"name": "Keep Alive                 ", "opcode": 0x18}
+AdminCommand.DirectiveSend            = {"name": "Directive Send             ", "opcode": 0x19}
+AdminCommand.DirectiveReceive         = {"name": "Directive Receive          ", "opcode": 0x1A}
+AdminCommand.VirtualizationManagement = {"name": "Virtualization Management  ", "opcode": 0x1C}
+AdminCommand.NVMeMISend               = {"name": "NVMe-MI Send               ", "opcode": 0x1D}
+AdminCommand.NVMeMIReceive            = {"name": "NVMe-MI Receive            ", "opcode": 0x1E}
+AdminCommand.CapacityManagement       = {"name": "Capacity Management        ", "opcode": 0x20}
+AdminCommand.Lockdown                 = {"name": "Lockdown                   ", "opcode": 0x24}
+AdminCommand.DoorbellBufferConfig     = {"name": "Doorbell Buffer Config     ", "opcode": 0x7C}
+AdminCommand.FabricsCommands          = {"name": "Fabrics Commands           ", "opcode": 0x7F}
+AdminCommand.FormatNVM                = {"name": "Format NVM                 ", "opcode": 0x80}
+AdminCommand.SecuritySend             = {"name": "Security Send              ", "opcode": 0x81}
+AdminCommand.SecurityReceive          = {"name": "Security Receive           ", "opcode": 0x82}
+AdminCommand.Sanitize                 = {"name": "Sanitize                   ", "opcode": 0x84}
+AdminCommand.GetLBAStatus             = {"name": "Get LBA Status             ", "opcode": 0x86}
+
+globals.IoCommand = {}
+
+IoCommand.Flush                 = {"name": "Flush                  ", "opcode": 0x00}  
+IoCommand.Write                 = {"name": "Write                  ", "opcode": 0x01}  
+IoCommand.Read                  = {"name": "Read                   ", "opcode": 0x02}  
+IoCommand.WriteUncorrectable    = {"name": "Write Uncorrectable    ", "opcode": 0x04}  
+IoCommand.Compare               = {"name": "Compare                ", "opcode": 0x05}  
+IoCommand.WriteZeroes           = {"name": "Write Zeroes           ", "opcode": 0x08}  
+IoCommand.DatasetManagement     = {"name": "Dataset Management     ", "opcode": 0x09}  
+IoCommand.Verify                = {"name": "Verify                 ", "opcode": 0x0C}  
+IoCommand.ReservationRegister   = {"name": "Reservation Register   ", "opcode": 0x0D}  
+IoCommand.ReservationReport     = {"name": "Reservation Report     ", "opcode": 0x0E}  
+IoCommand.ReservationAcquire    = {"name": "Reservation Acquire    ", "opcode": 0x11}  
+IoCommand.ReservationRelease    = {"name": "Reservation Release    ", "opcode": 0x15}  
+IoCommand.Copy                  = {"name": "Copy                   ", "opcode": 0x19}  
+
+IoCommand.ZoneManagementSend    = {"name": "Zone Management Send   ", "opcode": 0x79}  
+IoCommand.ZoneManagementReceive = {"name": "Zone Management Receive", "opcode": 0x7A}  
+IoCommand.ZoneAppend            = {"name": "Zone Append            ", "opcode": 0x7D}  
+
+globals.KVCommand = {}
+
+KVCommand.Store        = {"name": "Store                  ", "opcode": 0x01} 
+KVCommand.Retrieve     = {"name": "Retrieve               ", "opcode": 0x02} 
+KVCommand.Delete       = {"name": "Delete                 ", "opcode": 0x10} 
+KVCommand.Exist        = {"name": "Exist                  ", "opcode": 0x14} 
+KVCommand.List         = {"name": "List                   ", "opcode": 0x06} 
+
+
+globals.FabricsCommand = {}
+
+FabricsCommand.PropertySet            = {"name": "Property Set            ", "opcode": 0x00} 
+FabricsCommand.Connect                = {"name": "Connect                 ", "opcode": 0x01} 
+FabricsCommand.PropertyGet            = {"name": "Property Get            ", "opcode": 0x04} 
+FabricsCommand.AuthenticationSend     = {"name": "Authentication Send     ", "opcode": 0x05} 
+FabricsCommand.AuthenticationReceive  = {"name": "Authentication Receive  ", "opcode": 0x06} 
+FabricsCommand.Disconnect             = {"name": "Disconnect              ", "opcode": 0x08} 
+
+globals.FeatureId = {}
+
+FeatureId.Arbitration                              = {"name": "Arbitration                          ", "FID": 0x01} 
+FeatureId.PowerManagement                          = {"name": "Power Management                     ", "FID": 0x02}   
+FeatureId.TemperatureThreshold                     = {"name": "Temperature Threshold                ", "FID": 0x04}   
+FeatureId.VolatileWriteCache                       = {"name": "Volatile Write Cache                 ", "FID": 0x06}  
+FeatureId.NumberofQueues                           = {"name": "Number of Queues                     ", "FID": 0x07} 
+FeatureId.InterruptCoalescing                      = {"name": "Interrupt Coalescing                 ", "FID": 0x08} 
+FeatureId.InterruptVectorConfiguration             = {"name": "Interrupt Vector Configuration       ", "FID": 0x09} 
+FeatureId.AsynchronousEventConfiguration           = {"name": "Asynchronous Event Configuration     ", "FID": 0x0B} 
+FeatureId.AutonomousPowerStateTransition           = {"name": "Autonomous Power State Transition    ", "FID": 0x0C} 
+FeatureId.HostMemoryBuffer                         = {"name": "Host Memory Buffer                   ", "FID": 0x0D} 
+FeatureId.Timestamp                                = {"name": "Timestamp                            ", "FID": 0x0E} 
+FeatureId.KeepAliveTimer                           = {"name": "Keep Alive Timer                     ", "FID": 0x0F} 
+FeatureId.HostControlledThermalManagement          = {"name": "Host Controlled Thermal Management   ", "FID": 0x10} 
+FeatureId.NonOperationalPowerStateConfig           = {"name": "Non-Operational Power State Config   ", "FID": 0x11} 
+FeatureId.ReadRecoveryLevelConfig                  = {"name": "Read Recovery Level Config           ", "FID": 0x12} 
+FeatureId.PredictableLatencyModeConfig             = {"name": "Predictable Latency Mode Config      ", "FID": 0x13} 
+FeatureId.PredictableLatencyModeWindow             = {"name": "Predictable Latency Mode Window      ", "FID": 0x14} 
+FeatureId.HostBehaviorSupport                      = {"name": "Host Behavior Support                ", "FID": 0x16} 
+FeatureId.SanitizeConfig                           = {"name": "Sanitize Config                      ", "FID": 0x17} 
+FeatureId.EnduranceGroupEventConfiguration         = {"name": "Endurance Group Event Configuration  ", "FID": 0x18} 
+FeatureId.IOCommandSetProfile                      = {"name": "IO Command Set Profile               ", "FID": 0x19} 
+FeatureId.SpinupControl                            = {"name": "Spinup Control                       ", "FID": 0x1A}   
+FeatureId.EnhancedControllerMetadata               = {"name": "Enhanced Controller Metadata         ", "FID": 0x7D} 
+FeatureId.ControllerMetadata                       = {"name": "Controller Metadata                  ", "FID": 0x7E}  
+FeatureId.NamespaceMetadata                        = {"name": "Namespace Metadata                   ", "FID": 0x7F} 
+FeatureId.SoftwareProgressMarker                   = {"name": "Software Progress Marker             ", "FID": 0x80} 
+FeatureId.HostIdentifier                           = {"name": "Host Identifier                      ", "FID": 0x81} 
+FeatureId.ReservationNotificationMask              = {"name": "Reservation Notification Mask        ", "FID": 0x82}  
+FeatureId.ReservationPersistence                   = {"name": "Reservation Persistence              ", "FID": 0x83} 
+FeatureId.NamespaceWriteProtectionConfig           = {"name": "Namespace Write Protection Config    ", "FID": 0x84} 
+
+
+globals.LogPageId = {}
+
+LogPageId.SupportedLogPages                       = {"name": "Supported Log Pages                       ", "LID": 0x00} 
+LogPageId.ErrorInformation                        = {"name": "Error Information                         ", "LID": 0x01} 
+LogPageId.SMARTHealthInformation                  = {"name": "SMART / Health Information                ", "LID": 0x02} 
+LogPageId.FirmwareSlotInformation                 = {"name": "Firmware Slot Information                 ", "LID": 0x03} 
+LogPageId.ChangedNamespaceList                    = {"name": "Changed Namespace List                    ", "LID": 0x04} 
+LogPageId.CommandsSupportedandEffects             = {"name": "Commands Supported and Effects            ", "LID": 0x05} 
+LogPageId.DeviceSelftest                          = {"name": "Device Self-test                          ", "LID": 0x06} 
+LogPageId.TelemetryHostInitiated                  = {"name": "Telemetry Host-Initiated                  ", "LID": 0x07} 
+LogPageId.TelemetryControllerInitiated            = {"name": "Telemetry Controller-Initiated            ", "LID": 0x08} 
+LogPageId.EnduranceGroupInformation               = {"name": "Endurance Group Information               ", "LID": 0x09} 
+LogPageId.PredictableLatencyPerNVMSet             = {"name": "Predictable Latency Per NVM Set           ", "LID": 0x0A} 
+LogPageId.PredictableLatencyEventAggregate        = {"name": "Predictable Latency Event Aggregate       ", "LID": 0x0B} 
+LogPageId.AsymmetricNamespaceAccess               = {"name": "Asymmetric Namespace Access               ", "LID": 0x0C} 
+LogPageId.PersistentEventLog                      = {"name": "Persistent Event Log                      ", "LID": 0x0D} 
+LogPageId.EnduranceGroupEventAggregate            = {"name": "Endurance Group Event Aggregate           ", "LID": 0x0F} 
+LogPageId.MediaUnitStatus                         = {"name": "Media Unit Status                         ", "LID": 0x10} 
+LogPageId.SupportedCapacityConfigurationList      = {"name": "Supported Capacity Configuration List     ", "LID": 0x11} 
+LogPageId.FeatureIdentifiersSupportedandEffects   = {"name": "Feature Identifiers Supported and Effects ", "LID": 0x12} 
+LogPageId.NVMeMICommandsSupportedandEffects       = {"name": "NVMe-MI Commands Supported and Effects    ", "LID": 0x13} 
+LogPageId.CommandandFeatureLockdown               = {"name": "Command and Feature Lockdown              ", "LID": 0x14} 
+LogPageId.BootPartition                           = {"name": "Boot Partition                            ", "LID": 0x15} 
+LogPageId.RotationalMediaInformation              = {"name": "Rotational Media Information              ", "LID": 0x16} 
+LogPageId.Discovery                               = {"name": "Discovery                                 ", "LID": 0x70} 
+LogPageId.ReservationNotification                 = {"name": "Reservation Notification                  ", "LID": 0x80} 
+LogPageId.SanitizeStatus                          = {"name": "Sanitize Status                           ", "LID": 0x81} 
+
+
+
+globals.DataPattern = {}
+
+DataPattern.User                 = {"name": "User data                ", "DPID": 0x00}  
+DataPattern.Zeros                = {"name": "Zeros data               ", "DPID": 0x01}  
+DataPattern.Ones                 = {"name": "Ones data                ", "DPID": 0x02}  
+DataPattern.Sequential           = {"name": "Sequential data          ", "DPID": 0x03}  
+DataPattern.SectorNumber         = {"name": "Sector Number            ", "DPID": 0x04}  
+DataPattern.RandomData1          = {"name": "Random data1             ", "DPID": 0x05}  
+DataPattern.RandomData2          = {"name": "Random data2             ", "DPID": 0x06}  
+DataPattern.Binary_55h           = {"name": "Binary data1(55h)        ", "DPID": 0x07}  
+DataPattern.Binary_AAh           = {"name": "Binary data2(AAh)        ", "DPID": 0x08}  
+DataPattern.Binary_33h           = {"name": "Binary data3(33h)        ", "DPID": 0x09}  
+DataPattern.Binary_CCh           = {"name": "Binary data4(CCh)        ", "DPID": 0x0A}  
+DataPattern.Binary_0Fh           = {"name": "Binary data5(0Fh)        ", "DPID": 0x0B}  
+DataPattern.Binary_F0h           = {"name": "Binary data6(F0h)        ", "DPID": 0x0C}  
+DataPattern.Binary_00FFh         = {"name": "Binary data7(00FFh)      ", "DPID": 0x0D}  
+DataPattern.Binary_FF00h         = {"name": "Binary data8(FF00h)      ", "DPID": 0x0E}  
+DataPattern.Binary_0000FFFFh     = {"name": "Binary data9(0000FFFFh)  ", "DPID": 0x0F}  
+DataPattern.Binary_FFFF0000h     = {"name": "Binary data10(FFFF0000h) ", "DPID": 0x10}  
+DataPattern.Undefined            = {"name": "Undefined                ", "DPID": 0xFF}  

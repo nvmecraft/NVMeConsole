@@ -1,0 +1,259 @@
+//// Status : draft - not tested.
+//   
+
+//#LIBNAME "admin"
+
+globals.AdminCmd = {}
+
+//
+// Data Memory
+//
+
+AdminCmd.SetDataMem = function(bytesize=0, datapattern=null, filepath=null)
+    if bytesize == 0 then
+        return null
+    end if
+
+    iodata = new DATAMEM
+    iodata.DataMem_Assign(bytesize)
+
+    if datapattern != null then
+        iodata.DataMem_SetDataPattern(datapattern)
+    end if
+
+    if filepath != null then
+        iodata.DataMem_FromFile(filepath)
+    end if
+    return iodata
+end function
+
+//
+// Physically Continuous Memory - PCMem
+//
+AdminCmd.SetPCMem = function(bytesize=0, issystem, filepath=null)
+    if bytesize == 0 then
+        return null
+    end if
+
+    pcmem = new PCMEM
+    pcmem.PCMem_Assign(bytesize, issystem)
+
+    if filepath != null then
+        pcmem.PCMem_FromFile(filepath)
+    end if
+    return pcmem
+end function
+
+//
+// Delete I/O Submission Queue
+//
+AdminCmd.DeleteIoSubmissionQueue = function(qid)
+    if qid == 0 then
+        print "qid = 0"
+    end if
+
+    asqe = new SQE
+    asqe.opc = AdminCommand.DeleteIoSubmissionQueue.opcode
+    asqe.cdw10 = qid
+    asqe.Sqe_SubmitTailSync(0, 1)
+end function
+
+//
+// Create I/O Submission Queue command
+//
+AdminCmd.CreateIoSubmissionQueue = function(qid, qsize, cqid, qprio, pc, nvmsetid)
+    if qid == 0 then
+        print "qid = 0"
+        return false
+    end if
+    if qsize == 0 then
+        print "qsize = 0"
+        return false
+    end if
+    if cqid == 0 then
+        print "cqid = 0"
+        return false
+    end if
+    if qprio > 3 then
+        print "invalid QPRIO value"
+        return false
+    end if
+    if pc != 1 then
+        print "For now, NVMeConsole only support physically congiguous memory."
+        return false
+    end if
+
+    iosqmem = AdminCmd.SetPCMem(qsize*64, true)
+
+    asqe = new SQE
+    asqe.opc = AdminCommand.CreateIoSubmissionQueue.opcode
+    asqe.pcmem = iosqmem
+    asqe.cdw10 = BitShiftLeft32((qsize-1), 16)
+    asqe.cdw10 = BitOr32(asqe.cdw10, qid)
+    asqe.cdw11 = BitShiftLeft32(cqid, 16)
+    asqe.cdw11 = BitOr32(asqe.cdw11, BitShiftLeft32(qprio, 1))
+    asqe.cdw11 = BitOr32(asqe.cdw11, BitShiftLeft32(pc, 0))
+    asqe.cdw12 = BitOr32(asqe.cdw11, BitShiftLeft32(nvmsetid, 0))
+
+    asqe.Sqe_SubmitTailSync(0, 1)
+end function
+
+//
+// Get Log Page
+//
+
+AdminCmd.GetLogPage = function(lid, lsp, rae, numdl, numdu, lsid, lpol, lpou, uuid, ot, csi)
+    numd = BitShiftLeft32(numdu, 16)
+    numd = numd + numdl
+    datasize = numd * 4
+
+    lpdata = new DATAMEM
+    lpdata.DataMem_Assign(datasize)
+
+    asqe = new SQE
+    asqe.opc = AdminCommand.GetLogPage.opcode
+    asqe.datamem = lpdata
+
+    asqe.cdw10 = BitShiftLeft32(numd-1, 16)
+    asqe.cdw10 = BitOr32(asqe.cdw10, BitShiftLeft32(rae, 15))
+    asqe.cdw10 = BitOr32(asqe.cdw10, BitShiftLeft32(lsp, 8))
+    asqe.cdw10 = BitOr32(asqe.cdw10, BitShiftLeft32(lid, 0))
+
+    asqe.cdw11 = BitShiftLeft32(lsid, 16)
+    asqe.cdw11 = BitOr32(asqe.cdw11, BitShiftLeft32(numdu, 0))
+
+    asqe.cdw12 = lpol
+    asqe.cdw13 = lpou
+
+    asqe.cdw14 = BitShiftLeft32(csi, 24)
+    asqe.cdw14 = BitOr32(asqe.cdw14, BitShiftLeft32(ot, 23))
+    asqe.cdw14 = BitOr32(asqe.cdw14, BitShiftLeft32(uuid, 0))
+
+    asqe.Sqe_SubmitTailSync(0, 1)
+end function
+
+//
+// Delete I/O Completion Queue command
+//
+AdminCmd.DeleteIoCompletionQueue = function(qid)
+    if qid == 0 then
+        print "qid = 0"
+    end if
+
+    asqe = new SQE
+    asqe.opc = AdminCommand.DeleteIoCompletionQueue.opcode
+    asqe.cdw10 = qid
+    asqe.Sqe_SubmitTailSync(0, 1)
+end function
+
+//
+// Create I/O Completion Queue command
+//
+AdminCmd.CreateIoCompletionQueue = function(qid, qsize, pc, ien, iv)
+    if qid == 0 then
+        print "qid = 0"
+        return false
+    end if
+    if qsize == 0 then
+        print "qsize = 0"
+        return false
+    end if
+    if pc != 1 then
+        print "For now, NVMeConsole only support physically congiguous memory."
+        return false
+    end if
+    if ien != 1 then
+        return false
+    end if
+    if iv != 0 then
+        print "For now, NVMeConsole only support pcie legacy interrupt."
+        return false
+    end if
+
+    iocqmem = AdminCmd.SetPCMem(qsize*16, true)
+
+    asqe = new SQE
+    asqe.opc = AdminCommand.CreateIoCompletionQueue.opcode
+    asqe.pcmem = iocqmem
+    asqe.cdw10 = BitShiftLeft32((qsize-1), 16)
+    asqe.cdw10 = BitOr32(asqe.cdw10, qid)
+
+    asqe.cdw11 = BitShiftLeft32(iv, 16)
+    asqe.cdw11 = BitOr32(asqe.cdw11, BitShiftLeft32(ien, 1))
+    asqe.cdw11 = BitOr32(asqe.cdw11, BitShiftLeft32(pc, 0))
+
+    asqe.Sqe_SubmitTailSync(0, 1)
+end function
+
+//
+// Identify command
+//
+AdminCmd.Identify = function(nsid, cns, cntid, cnssid, csi, uuid)
+    
+    iddata = new DATAMEM
+    iddata.DataMem_Assign(4096)
+
+    asqe = new SQE
+    asqe.opc = AdminCommand.Identify.opcode
+    asqe.datamem = iddata
+    asqe.nsid = nsid
+
+    asqe.cdw10 = BitShiftLeft32(cntid, 16)
+    asqe.cdw10 = BitOr32(asqe.cdw10, BitShiftLeft32(cns, 0))
+
+    asqe.cdw11 = BitOr32(asqe.cdw11, BitShiftLeft32(csi, 24))
+    asqe.cdw11 = BitOr32(asqe.cdw11, BitShiftLeft32(cnssid, 0))
+
+    asqe.cdw14 = BitOr32(asqe.cdw14, BitShiftLeft32(uuid, 0))
+
+    asqe.Sqe_SubmitTailSync(0, 1)
+    return iddata
+end function
+
+//
+// Abort command
+//
+AdminCmd.Abort = function(sqid, cid)
+    asqe = new SQE
+    asqe.opc = AdminCommand.Abort.opcode
+
+    asqe.cdw10 = BitShiftLeft32(cid, 16)
+    asqe.cdw10 = BitOr32(asqe.cdw10, BitShiftLeft32(sqid, 0))
+
+    asqe.Sqe_SubmitTailSync(0, 1)
+end function
+
+//
+// Asynchronous Event Request command
+//
+AdminCmd.AsynchronousEventRequest = function()
+    asqe = new SQE
+    asqe.opc = AdminCommand.AsynchronousEventRequest.opcode
+
+    asqe.Sqe_SubmitTailSync(0, 1)
+end function
+
+//
+// Namespace Management command
+//
+
+//
+// Firmware Commit command
+//
+AdminCmd.FirmwareCommit = function(fs, ca, bpid)
+    asqe = new SQE
+    asqe.opc = AdminCommand.FirmwareCommit.opcode
+
+    asqe.cdw10 = BitShiftLeft32(bpid, 31)
+    asqe.cdw10 = BitOr32(asqe.cdw10, BitShiftLeft32(ca, 3))
+    asqe.cdw10 = BitOr32(asqe.cdw10, BitShiftLeft32(fa, 0))
+
+    asqe.Sqe_SubmitTailSync(0, 1)
+end function
+
+//
+// Firmware Image Download command
+//
+AdminCmd.FirmwareCommit = function()
+
+end function

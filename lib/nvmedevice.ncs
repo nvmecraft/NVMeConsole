@@ -1,0 +1,277 @@
+//// This is the library for NVMe Device. It is imported and invoked
+// via
+
+//#LIBNAME "dev"
+
+
+import("def", ".\lib\predefinitions.ncs")
+import("admin", ".\lib\admincommand.ncs")
+import("io", ".\lib\iocommand.ncs")
+
+
+
+CtrlProperty.Get = function(property)
+    val = 0
+    val = ReadCtrlReg32(property.offset)
+    return val
+end function
+
+CtrlProperty.Set = function(property, val)
+    val = WriteCtrlReg32(property.offset, val)
+end function
+
+CtrlProperty.List = function(fullname)
+    val = 0
+
+    for i in range(0, CtrlPropertyList.len-1)
+        val = CtrlProperty.Get(CtrlPropertyList[i])
+        if fullname == true then
+            print " " + CtrlPropertyList[i].fullName + " - " + ToHexString(val) 
+        else
+            print " " + CtrlPropertyList[i].name + " - " + ToHexString(val) 
+        end if
+    end for
+end function
+
+//
+// Controller
+//
+
+globals.Controller = {}
+
+CAPLval = CtrlProperty.Get(CtrlProperty.CAP_l)
+CAP_TO = BitAnd32(BitShiftRight32(CAPLval, 24), 0xFF)
+globals.timeout = CAP_TO * 500
+
+Controller.Reset = function()
+
+end function
+
+Controller.Status = function()
+    CSTSval = CtrlProperty.Get(CtrlProperty.CSTS)
+    CSTS_RDY = BitAnd32(CSTSval, 0x01)
+    
+    if CSTS_RDY == 0x01 then
+        return "enabled"
+    else
+        return "disabled"
+    end if
+end function
+
+Controller.Enable = function()
+    CCval = CtrlProperty.Get(CtrlProperty.CC)
+    CCval = BitOr32(CCval, 0x01)
+    CtrlProperty.Set(CtrlProperty.CC, CCval)
+    
+    stime = time
+    while true
+        if Controller.Status == "enabled" then
+            result = true
+            break;
+        end if
+
+        if(time - stime) > timeout then
+            print "Enable controller: timeout"
+            result = false
+            break;
+        end if
+    end while
+    
+    wait  // wait a second for NVMeConsole is prepared.
+
+    return result;
+end function
+
+Controller.Disable = function()
+    CCval = ReadCtrlReg32(CtrlProperty.CC.offset)
+    CCval = BitAnd32(CCval, BitNot32(0x01))
+    WriteCtrlReg32(CtrlProperty.CC.offset, CCval)
+
+    stime = time
+    while true
+        if Controller.Status == "disabled" then
+            result = true
+            break;
+        end if
+
+        if(time - stime) > timeout then
+            print "Disable controller: timeout"
+            result = false
+            break;
+        end if
+    end while
+
+    wait  // wait a second for NVMeConsole is prepared.
+
+    return result;
+end function
+
+Controller.Initialization = function(asqs, acqs, ioqcount, ioqs)
+    if asqs < 3 then
+        print "asqs is too small."
+        return false
+    end if
+    if acqs < 3 then
+        print "acqs is too small."
+        return false
+    end if
+
+    // 3.5.1 - 1
+    if Controller.Status == "enabled" then
+        if(Controller.Disable() == false) then
+            return false
+        end if
+    end if
+
+    // set AQA
+    AQAval = acqs-1
+    AQAval = BitShiftLeft32(AQAval, 16)
+    AQAval = BitOr32(AQAval, asqs-1)
+
+    CtrlProperty.Set(CtrlProperty.AQA, AQAval)
+
+    // set CC
+    CCval = CtrlProperty.Get(CtrlProperty.CC)
+    CCval = BitAnd32(CCval, BitNot32(BitShiftLeft32(0x0F, 20)))
+    CCval = BitOr32(CCval, BitShiftLeft32(0x04, 20))
+    CtrlProperty.Set(CtrlProperty.CC, CCval);
+
+    CCval = CtrlProperty.Get(CtrlProperty.CC)
+    CCval = BitAnd32(CCval, BitNot32(BitShiftLeft32(0x0F, 16)))
+    CCval = BitOr32(CCval, BitShiftLeft32(0x06, 16))
+    CtrlProperty.Set(CtrlProperty.CC, CCval);
+
+    // set ASQ
+    asqmem = new PCMEM
+    asqmem.PCMem_Assign(asqs*64, true)
+    CtrlProperty.Set(CtrlProperty.ASQ_l, asqmem.address_l)
+    CtrlProperty.Set(CtrlProperty.ASQ_u, asqmem.address_u)
+
+    // set ACQ
+    acqmem = new PCMEM
+    acqmem.PCMem_Assign(acqs*16, true)
+    CtrlProperty.Set(CtrlProperty.ACQ_l, acqmem.address_l)
+    CtrlProperty.Set(CtrlProperty.ACQ_u, acqmem.address_u)
+
+    // set CC_CSS
+    CAP_CSSval = BitAnd32(BitShiftRight32(CtrlProperty.Get(CtrlProperty.CAP_u), 5), 0xFF)
+
+    if (BitAnd32(CAP_CSSval, 0x80) != 0) then
+        CCval = CtrlProperty.Get(CtrlProperty.CC)
+        CCval = BitAnd32(CCval, BitNot32(BitShiftLeft32(0x07, 4)))
+        CCval = BitOr32(CCval, BitShiftLeft32(0x07, 4))
+        CtrlProperty.Set(CtrlProperty.CC, CCval);
+    end if
+
+    if BitAnd32(CAP_CSSval, 0x40) != 0 then
+        CCval = CtrlProperty.Get(CtrlProperty.CC)
+        CCval = BitAnd32(CCval, BitNot32(BitShiftLeft32(0x06, 4)))
+        CCval = BitOr32(CCval, BitShiftLeft32(0x06, 4))
+        CtrlProperty.Set(CtrlProperty.CC, CCval);
+    end if
+
+    if (BitAnd32(CAP_CSSval, 0x40) == 0) and (BitAnd32(CAP_CSSval, 0x01) != 0) then
+        CCval = CtrlProperty.Get(CtrlProperty.CC)
+        CCval = BitAnd32(CCval, BitNot32(BitShiftLeft32(0x00, 0)))
+        CCval = BitOr32(CCval, BitShiftLeft32(0x00, 0))
+        CtrlProperty.Set(CtrlProperty.CC, CCval);
+    end if
+
+    // Enable controller
+    if(Controller.Enable() == false) then
+        return false
+    end if
+
+    // Issuing the Identify command - CNS 01h
+    iddata = new DATAMEM
+    iddata.DataMem_Assign(4096)
+
+    asqe = new SQE
+    asqe.opc = AdminCommand.Identify.opcode
+    asqe.datamem = iddata
+    asqe.cdw10 = 1
+    asqe.Sqe_SubmitTailSync(0, 0.5)
+
+    // 3.5.1 - 8
+    CC_CSSval = BitAnd32(BitShiftRight32(CtrlProperty.Get(CtrlProperty.CC), 4), 0x07)
+    // 3.5.1 - 8.a
+    if (CC_CSSval == 0x00) then
+        iddata = new DATAMEM
+        iddata.DataMem_Assign(4096)
+
+        asqe = new SQE
+        asqe.opc = AdminCommand.Identify.opcode
+        asqe.datamem = iddata
+        asqe.ns = 1
+        asqe.cdw10 = 0
+        asqe.Sqe_SubmitTailSync(0, 0.5)
+    end if
+    // 3.5.1 - 8.b - not completed
+    CAP_CSSval = BitAnd32(BitShiftRight32(CtrlProperty.Get(CtrlProperty.CAP_u), 5), 0xFF)
+    CAP_CSS_bit6 = BitAnd32(BitShiftRight32(CAP_CSSval, 6), 0x01)
+    if (CAP_CSS_bit6 == 1) then
+        iddata = new DATAMEM
+        iddata.DataMem_Assign(4096)
+
+        asqe = new SQE
+        asqe.opc = AdminCommand.Identify.opcode
+        asqe.datamem = iddata
+        asqe.ns = 0
+        asqe.cdw10 = 0x1C
+        asqe.Sqe_SubmitTailSync(0, 0.5)
+    end if
+
+    // 3.5.1 - 9
+    if (ioqcount < 1) then
+        print "IO Queue Count is too small."
+        return false
+    end if
+
+    if (ioqs < 3) then
+        print "IO Queue Size is too small."
+        return false
+    end if
+
+    // Set Features - Number of queues
+    asqe = new SQE
+    asqe.opc = AdminCommand.SetFeatures.opcode
+    asqe.cdw10 = FeatureId.NumberofQueues.FID
+    asqe.cdw11 = BitShiftLeft32((ioqs-1), 16)
+    asqe.cdw11 = BitOr32(asqe.cdw11, (ioqs-1))
+    asqe.Sqe_SubmitTailSync(0, 1)
+
+    // create IO Completion queues
+    for qid in range (1, ioqcount) 
+        iocqmem = new PCMEM
+        iocqmem.PCMem_Assign(ioqs*16, true)
+
+        asqe = new SQE
+        asqe.pcmem = iocqmem
+        asqe.opc = AdminCommand.CreateIoCompletionQueue.opcode
+        asqe.cdw10 = BitShiftLeft32((ioqs-1), 16)
+        asqe.cdw10 = BitOr32(asqe.cdw10, qid)
+        asqe.cdw11 = BitShiftLeft32(1, 1)
+        asqe.cdw11 = BitOr32(asqe.cdw11, BitShiftLeft32(1, 0))
+
+        asqe.Sqe_SubmitTailSync(0, 1)
+    end for
+
+    // create IO Submission queues
+    for qid in range (1, ioqcount) 
+        iosqmem = new PCMEM
+        iosqmem.PCMem_Assign(ioqs*64, true)
+
+        asqe = new SQE
+        asqe.pcmem = iosqmem
+        asqe.opc = AdminCommand.CreateIoSubmissionQueue.opcode
+        asqe.cdw10 = BitShiftLeft32((ioqs-1), 16)
+        asqe.cdw10 = BitOr32(asqe.cdw10, qid)
+        asqe.cdw11 = BitShiftLeft32(qid, 16)
+        asqe.cdw11 = BitOr32(asqe.cdw11, BitShiftLeft32(2, 1))
+        asqe.cdw11 = BitOr32(asqe.cdw11, BitShiftLeft32(1, 0))
+
+        asqe.Sqe_SubmitTailSync(0, 1)
+    end for
+
+end function
+
