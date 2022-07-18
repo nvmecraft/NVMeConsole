@@ -254,6 +254,29 @@ end function
 //
 // Firmware Image Download command
 //
-AdminCmd.FirmwareCommit = function()
+AdminCmd.FirmwareImageDownload = function(path, numd, ofst)
+    datasize = numd * 4
 
+    fwmem = new PCMEM
+    fwmem.PCMem_Assign(datasize, false)
+    fwmem.PCMem_FromFile(path)
+
+    asqe = new SQE
+    asqe.opc = AdminCommand.FirmwareImageDownload.opcode
+    asqe.pcmem = fwmem
+
+    asqe.cdw10 = numd - 1
+    asqe.cdw11 = ofst
+
+    asqe.Sqe_SubmitTailSync(0, 1)
+end function
+
+//
+// Device Self-test command
+//
+AdminCmd.DeviceSelftest = function(stc)
+    asqe = new SQE
+    asqe.cdw10 = stc
+
+    asqe.Sqe_SubmitTailSync(0, 1)
 end function
